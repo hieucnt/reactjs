@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 function App() {
-  const [numberItems, setNumberItems] = useState(3);
   const [products, setProducts] = useState([
     {
       id: 1,
@@ -31,15 +30,55 @@ function App() {
       price: 459,
       image:
         "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,b_rgb:f5f5f5/zzmfk3kwuw3ktkilxfnp/air-jordan-1-mid-shoe-BpARGV.jpg",
-      quantity: 1,
+      quantity: 3,
     },
   ]);
+  let totalQuantity = products.reduce(
+    (number, item) => number + item.quantity,
+    0
+  );
+  const [numberItems, setNumberItems] = useState(totalQuantity);
   function removeProduct(id) {
-    let newProducts = products.filter((product) => product.id !== id);
-    let newNumberItems = numberItems - 1;
-    setProducts(newProducts);
-    setNumberItems(newNumberItems);
+    const confirmRemove = window.confirm("DO u want Delete?");
+    if (confirmRemove) {
+      const newProducts = products.filter((product) => product.id !== id);
+      //tinh so luong san pham
+      //Thay bang ham reduce
+      let quantity = 0;
+      for (let product of newProducts) {
+        quantity += product.quantity;
+      }
+      //end
+      setProducts(newProducts);
+      setNumberItems(quantity);
+    }
   }
+
+  function changeQuantity(event, productId) {
+    // Cap nhat lai quantity cua product tuong ung
+    const newProducts = products.map((product) => {
+      if (product.id === productId) {
+        const value = event.target.value;
+        product.quantity = value === "" ? 0 : parseInt(value);
+        return product;
+      }
+
+      return product;
+    });
+
+    // Tinh lai so luong san pham
+    let quantity = 0;
+    for (let product of newProducts) {
+      quantity += product.quantity;
+    }
+
+    //TODO: Tinh lai tong tien
+
+    // Cap nhat state
+    setProducts(newProducts);
+    setNumberItems(quantity);
+  }
+
   let subTotal = products.reduce(
     (total, productPrice) => total + productPrice.price * productPrice.quantity,
     0
@@ -67,7 +106,8 @@ function App() {
             type="number"
             className="quantity"
             step={1}
-            defaultValue={product.quantity}
+            value={product.quantity}
+            onChange={(event) => changeQuantity(event, product.id)}
           />
         </div>
         <div className="remove">
